@@ -5,7 +5,7 @@ export interface ICheckin extends Document {
   timestamp: Date;
 }
 
-const checkinSchema = new Schema<ICheckin>({
+const checkinSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   timestamp: { type: Date, default: Date.now },
 });

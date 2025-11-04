@@ -1,10 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true },
-  password: String,
-  role: { type: String, default: "member" }, // member or admin
+export interface IUser extends Document {
+  code: string; // FF01 for admin, FF10+ for members
+  pin: string; // 4-digit password (hashed)
+  role: "admin" | "member";
+  createdAt: Date;
+}
+
+const userSchema = new Schema<IUser>({
+  code: { type: String, required: true, unique: true },
+  pin: { type: String, required: true }, // hashed using bcrypt
+  role: { type: String, enum: ["admin", "member"], required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model<IUser>("User", userSchema);
