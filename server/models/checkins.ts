@@ -1,8 +1,13 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-const checkinSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+export interface ICheckin extends Document {
+  userId: mongoose.Types.ObjectId;
+  timestamp: Date;
+}
+
+const checkinSchema = new Schema<ICheckin>({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   timestamp: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("Checkin", checkinSchema);
+export default mongoose.model<ICheckin>("Checkin", checkinSchema);
