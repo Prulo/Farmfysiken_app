@@ -1,26 +1,29 @@
 <template>
-  <div class="p-10 max-w-md mx-auto">
-    <h1 class="text-3xl font-bold mb-4">Farmfysiken Login</h1>
+  <div class="login-container">
+    <div class="login-box">
+      <h1>Farmfysiken Login</h1>
 
-    <div>
-      <h2 class="text-xl font-semibold mb-2">Login</h2>
-      <input
-        v-model="loginCode"
-        placeholder="Code (FF01, FF10+)"
-        class="border p-2 mb-2 w-full"
-      />
-      <input
-        v-model="loginPin"
-        type="password"
-        placeholder="4-digit PIN"
-        class="border p-2 mb-2 w-full"
-      />
-      <button @click="login" class="bg-green-600 text-white px-4 py-2 rounded">
-        Login
-      </button>
+      <div class="login-form">
+        <h2>Member Login</h2>
+
+        <input
+          v-model="loginCode"
+          placeholder="Code (FF01, FF10+)"
+          class="input"
+        />
+        <input
+          v-model="loginPin"
+          type="password"
+          placeholder="4-digit PIN"
+          class="input"
+        />
+        <button @click="login" class="button">Login</button>
+      </div>
+
+      <p v-if="message" class="message">
+        {{ message }}
+      </p>
     </div>
-
-    <p v-if="message" class="mt-4 text-red-600">{{ message }}</p>
   </div>
 </template>
 
@@ -45,7 +48,7 @@ const login = async () => {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("token", data.token); // important
+      localStorage.setItem("token", data.token);
       router.push("/dashboard");
     } else {
       message.value = data.message || "Login failed";
@@ -55,3 +58,74 @@ const login = async () => {
   }
 };
 </script>
+
+<style scoped>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f3f3f3;
+}
+
+.login-box {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+h1 {
+  color: #136d38;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #136d38;
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background-color: #136d38;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #0f552b;
+}
+
+.message {
+  margin-top: 20px;
+  color: red;
+  font-weight: 500;
+}
+</style>

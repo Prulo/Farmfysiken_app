@@ -1,25 +1,20 @@
 <template>
-  <div class="p-10 max-w-md mx-auto text-center">
-    <h1 class="text-3xl font-bold mb-6">Member Dashboard</h1>
+  <div class="dashboard-container">
+    <div class="dashboard-box">
+      <h1>Member Dashboard</h1>
 
-    <p class="mb-4">Welcome! Use the button below to check in at the gym.</p>
+      <p class="description">
+        Welcome! Use the button below to check in at the gym.
+      </p>
 
-    <button
-      @click="checkIn"
-      :disabled="loading"
-      class="bg-green-600 text-white px-4 py-2 rounded"
-    >
-      {{ loading ? "Checking In..." : "Check In" }}
-    </button>
+      <button @click="checkIn" :disabled="loading" class="button">
+        {{ loading ? "Checking In..." : "Check In" }}
+      </button>
 
-    <p
-      v-if="message"
-      :class="
-        messageType === 'success' ? 'mt-4 text-green-700' : 'mt-4 text-red-600'
-      "
-    >
-      {{ message }}
-    </p>
+      <p v-if="message" :class="['message', messageType]">
+        {{ message }}
+      </p>
+    </div>
   </div>
 </template>
 
@@ -38,10 +33,8 @@ const message = ref("");
 const messageType = ref<"success" | "error">("success");
 const token = ref("");
 const loading = ref(false);
-
 const router = useRouter();
 
-// Get token from localStorage when dashboard loads
 onMounted(() => {
   token.value = localStorage.getItem("token") || "";
   if (!token.value) {
@@ -54,7 +47,6 @@ onMounted(() => {
   try {
     const decoded = jwtDecode<TokenPayload>(token.value);
 
-    // Redirect admins to admin page
     if (decoded.code === "FF01" || decoded.role === "admin") {
       router.push("/admin");
     }
@@ -90,10 +82,9 @@ const checkIn = async () => {
       message.value = "Checked in successfully!";
       messageType.value = "success";
 
-      // Wait 3 seconds before logging out
       setTimeout(() => {
-        localStorage.removeItem("token"); // remove token
-        router.push("/"); // redirect to login page
+        localStorage.removeItem("token");
+        router.push("/");
       }, 3000);
     } else {
       message.value = data.message || "Check-in failed";
@@ -110,8 +101,68 @@ const checkIn = async () => {
 </script>
 
 <style scoped>
-button:disabled {
+.dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f3f3f3;
+}
+
+.dashboard-box {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+h1 {
+  color: #136d38;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.description {
+  color: #333;
+  margin-bottom: 24px;
+  font-size: 1rem;
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background-color: #136d38;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #0f552b;
+}
+
+.button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.message {
+  margin-top: 20px;
+  font-weight: 500;
+}
+
+.message.success {
+  color: #136d38;
+}
+
+.message.error {
+  color: red;
 }
 </style>
