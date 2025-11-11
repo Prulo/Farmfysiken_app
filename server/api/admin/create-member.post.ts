@@ -7,7 +7,7 @@ import { verifyToken } from "../../utils/jwt";
 export default defineEventHandler(async (event) => {
   await connectDB();
 
-  // Get auth token
+  // 🔒 Auth check
   const authHeader = getHeader(event, "authorization");
   if (!authHeader)
     throw createError({ statusCode: 401, message: "Unauthorized" });
@@ -22,18 +22,33 @@ export default defineEventHandler(async (event) => {
       message: "Only admin can create users",
     });
 
-  // Read new member info
-  const body = await readBody<{ code: string; pin: string }>(event);
-  const { code, pin } = body;
+  // 🧾 Read body — now includes name
+  const body = await readBody<{ code: string; pin: string; name?: string }>(
+    event
+  );
+  const { code, pin, name } = body;
 
   if (!code || !pin)
     throw createError({ statusCode: 400, message: "Code and PIN required" });
 
-  // Hash PIN
+  // 🧠 Hash pin
   const hashedPin = await bcrypt.hash(pin, 10);
 
-  // Create member in DB
-  const user = await User.create({ code, pin: hashedPin, role: "member" });
+  // 🧱 Create user with new fields
+  const user = await User.create({
+    code,
+    pin: hashedPin,
+    name: name || "", // 👈 optional name
+    comment: "", // 👈 empty comment by default
+    role: "member",
+  });
 
-  return { success: true, user: { code: user.code, role: user.role } };
+  return {
+    success: true,
+    user: {
+      code: user.code,
+      name: user.name,
+      role: user.role,
+    },
+  };
 });
