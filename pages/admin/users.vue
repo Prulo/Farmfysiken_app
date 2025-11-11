@@ -2,7 +2,6 @@
   <div class="user-list-container">
     <h1>Användarlista</h1>
 
-    <!-- Search -->
     <input
       v-model="search"
       type="text"
@@ -10,10 +9,8 @@
       class="search-input"
     />
 
-    <!-- Loading -->
     <p v-if="loading">Laddar användare...</p>
 
-    <!-- Table -->
     <table v-else class="user-table">
       <thead>
         <tr>
@@ -41,18 +38,18 @@
     </p>
 
     <!-- Modal -->
-    <div v-if="selectedUser" class="modal-overlay">
+    <div v-if="showModal" class="modal-overlay">
       <div class="modal-content">
-        <h2>Användare: {{ selectedUser.code }}</h2>
+        <h2>Användare: {{ modalUser.code }}</h2>
 
         <label>
           Namn:
-          <input v-model="selectedUser.name" type="text" />
+          <input v-model="modalUser.name" type="text" />
         </label>
 
         <label>
           Kommentar:
-          <textarea v-model="selectedUser.comment"></textarea>
+          <textarea v-model="modalUser.comment"></textarea>
         </label>
 
         <label>
@@ -66,8 +63,11 @@
 
         <div class="modal-buttons">
           <button @click="updateUser">Spara</button>
+          <button @click="deleteUser(modalUser)">Radera</button>
           <button @click="closeModal">Avbryt</button>
         </div>
+
+        <p v-if="modalMessage">{{ modalMessage }}</p>
       </div>
     </div>
   </div>
@@ -98,10 +98,11 @@ const router = useRouter();
 const token = ref("");
 
 // Modal state
-const selectedUser = ref<User | null>(null);
+const showModal = ref(false);
+const modalUser = ref<User>({ _id: "", code: "" });
 const newPassword = ref("");
+const modalMessage = ref("");
 
-// --- Auth & fetch users ---
 onMounted(async () => {
   token.value = localStorage.getItem("token") || "";
   if (!token.value) router.push("/");
@@ -142,49 +143,63 @@ const filteredUsers = computed(() => {
   );
 });
 
-// --- Modal functions ---
+// Modal handlers
 const openUserModal = (user: User) => {
-  selectedUser.value = { ...user }; // kopiera för att inte direkt ändra listan
+  modalUser.value = { ...user }; // clone so we don't edit original immediately
   newPassword.value = "";
+  modalMessage.value = "";
+  showModal.value = true;
 };
 
 const closeModal = () => {
-  selectedUser.value = null;
-  newPassword.value = "";
+  showModal.value = false;
 };
 
+// Update user
 const updateUser = async () => {
-  if (!selectedUser.value) return;
-
   try {
-    const res = await fetch(
-      `/api/admin/update-user/${selectedUser.value._id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token.value}`,
-        },
-        body: JSON.stringify({
-          name: selectedUser.value.name,
-          comment: selectedUser.value.comment,
-          password: newPassword.value || undefined,
-        }),
-      }
-    );
+    const res = await fetch(`/api/admin/update-user/${modalUser.value._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: JSON.stringify({
+        name: modalUser.value.name,
+        comment: modalUser.value.comment,
+        password: newPassword.value || undefined,
+      }),
+    });
     const data = await res.json();
     if (res.ok) {
-      // uppdatera listan lokalt
-      const idx = users.value.findIndex(
-        (u) => u._id === selectedUser.value?._id
-      );
-      if (idx !== -1) users.value[idx] = { ...selectedUser.value! };
+      const idx = users.value.findIndex((u) => u._id === modalUser.value._id);
+      if (idx !== -1) users.value[idx] = { ...modalUser.value };
       closeModal();
     } else {
-      alert(data.message || "Kunde inte uppdatera användare");
+      modalMessage.value = data.message || "Kunde inte uppdatera användare";
     }
-  } catch (err) {
-    console.error(err);
+  } catch {
+    modalMessage.value = "Fel vid anslutning till server";
+  }
+};
+
+// Delete user
+const deleteUser = async (user: User) => {
+  if (!confirm(`Är du säker på att du vill radera ${user.code}?`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/delete-user/${user._id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    const data = await res.json();
+    if (res.ok) {
+      users.value = users.value.filter((u) => u._id !== user._id);
+      closeModal();
+    } else {
+      alert(data.message || "Radering misslyckades");
+    }
+  } catch {
     alert("Fel vid anslutning till server");
   }
 };
@@ -220,7 +235,6 @@ const updateUser = async () => {
   cursor: pointer;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
