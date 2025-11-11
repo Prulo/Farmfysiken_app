@@ -290,8 +290,6 @@ const renderGroup = (group: any, name: string, level = 1): string => {
   html += `</div></div>`;
   return html;
 };
-
-window.addEventListener("toggle", (e: any) => toggleGroup(e.detail));
 </script>
 
 <style scoped>
