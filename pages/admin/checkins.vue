@@ -20,7 +20,7 @@
       </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- Filters -->
     <div class="filters">
       <div class="filter-buttons">
         <button
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { jwtDecode } from "jwt-decode";
 
@@ -88,7 +88,7 @@ const searchQuery = ref("");
 const filterRange = ref<"day" | "week" | "month" | "year">("day");
 const openGroups = ref<string[]>([]);
 
-// ---------------- MOUNT ----------------
+// MOUNT
 onMounted(async () => {
   token.value = localStorage.getItem("token") || "";
   if (!token.value) router.push("/");
@@ -103,6 +103,11 @@ onMounted(async () => {
   }
 
   await fetchCheckins();
+  window.addEventListener("toggle", handleToggleEvent);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("toggle", handleToggleEvent);
 });
 
 const fetchCheckins = async () => {
@@ -117,7 +122,6 @@ const fetchCheckins = async () => {
   }
 };
 
-// ---------------- HELPERS ----------------
 const parseTimestamp = (input: any): Date | null => {
   if (!input) return null;
   const d = new Date(input);
@@ -132,14 +136,14 @@ const getWeekNumber = (d: Date) => {
   return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 };
 
-// ---------------- FILTERED ----------------
+// FILTERS
 const filteredCheckins = computed(() =>
   checkins.value.filter((c) =>
     c.userId?.code?.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 );
 
-// ---------------- TOTALS ----------------
+// TOTALS
 const todayCount = computed(() => {
   const today = new Date().toLocaleDateString();
   return filteredCheckins.value.filter(
@@ -167,7 +171,7 @@ const yearCount = computed(() => {
 
 const allTimeCount = computed(() => filteredCheckins.value.length);
 
-// ---------------- GROUPING ----------------
+// GROUPING
 const groupByDay = (list: Checkin[]): Record<string, Checkin[]> => {
   const grouped: Record<string, Checkin[]> = {};
   list.forEach((c) => {
@@ -252,13 +256,7 @@ const displayedGroups = computed(() => {
   }
 });
 
-// ---------------- RENDER ----------------
-const toggleGroup = (key: string) => {
-  if (openGroups.value.includes(key))
-    openGroups.value = openGroups.value.filter((k) => k !== key);
-  else openGroups.value.push(key);
-};
-
+// RENDER
 const countCheckins = (group: any): number => {
   if (Array.isArray(group)) return group.length;
   if (typeof group === "object")
@@ -267,13 +265,13 @@ const countCheckins = (group: any): number => {
 };
 
 const renderGroup = (group: any, name: string, level = 1): string => {
-  let html = `<div>`;
+  let html = `<div class="group-wrapper">`;
   html += `<button class="group-toggle level-${level}" onclick="window.dispatchEvent(new CustomEvent('toggle',{detail:'${name}'}))">${name} (${countCheckins(
     group
   )})</button>`;
-  html += `<div style="display:${
+  html += `<div class="group-content" style="display:${
     openGroups.value.includes(name) ? "block" : "none"
-  };margin-left:${level * 15}px">`;
+  };">`;
   if (Array.isArray(group)) {
     html += `<table class="checkin-table"><thead><tr><th>Member Code</th><th>Time</th></tr></thead><tbody>`;
     group.forEach((c: Checkin) => {
@@ -290,6 +288,14 @@ const renderGroup = (group: any, name: string, level = 1): string => {
   html += `</div></div>`;
   return html;
 };
+
+// EVENT HANDLER
+const handleToggleEvent = (e: CustomEvent) => {
+  const key = e.detail;
+  if (openGroups.value.includes(key))
+    openGroups.value = openGroups.value.filter((k) => k !== key);
+  else openGroups.value.push(key);
+};
 </script>
 
 <style scoped>
@@ -299,6 +305,8 @@ const renderGroup = (group: any, name: string, level = 1): string => {
   padding: 30px;
   font-family: "Inter", sans-serif;
 }
+
+/* Totals */
 .totals {
   display: flex;
   gap: 15px;
@@ -324,6 +332,7 @@ const renderGroup = (group: any, name: string, level = 1): string => {
   color: #1b5e1b;
 }
 
+/* Filters */
 .filters {
   display: flex;
   gap: 10px;
@@ -348,48 +357,62 @@ const renderGroup = (group: any, name: string, level = 1): string => {
   border-radius: 6px;
 }
 
-.group-toggle {
+/* Groups */
+.group-wrapper {
+  width: 100%;
+}
+
+:deep(.group-toggle) {
   width: 100%;
   text-align: left;
-  padding: 10px 15px;
+  padding: 12px 18px;
   background: #4caf50;
   border: none;
   color: white;
   font-weight: 500;
   cursor: pointer;
-  margin-top: 3px;
-  border-radius: 4px;
+  margin-top: 5px;
+  border-radius: 6px;
   transition: background 0.2s;
 }
-.group-toggle:hover {
+:deep(.group-toggle:hover) {
   background: #3e923e;
-}
-.group-toggle.level-2 {
-  padding-left: 25px;
-  background: #3e923e;
-}
-.group-toggle.level-3 {
-  padding-left: 45px;
-  background: #2c7d2c;
-}
-.group-toggle.level-4 {
-  padding-left: 65px;
-  background: #1b5e1b;
 }
 
-.checkin-table {
+:deep(.checkin-table) {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 5px;
-  margin-bottom: 10px;
+  margin-top: 4px;
 }
+
 .checkin-table th,
-.checkin-table td {
+:deep(.checkin-table td) {
   border: 1px solid #ddd;
-  padding: 6px 8px;
+  padding: 6px 10px;
   text-align: left;
 }
-.checkin-table tr:nth-child(even) {
-  background: #f9f9f9;
+
+:deep(.checkin-table th) {
+  background-color: #f2f2f2;
+}
+
+:deep(.group-toggle),
+:deep(.group-toggle.level-2),
+:deep(.group-toggle.level-3),
+:deep(.group-toggle.level-4) {
+  width: 100%;
+  background: #4caf50;
+  color: white;
+  border-radius: 6px;
+  padding: 12px 18px;
+  margin-top: 5px;
+  border: none;
+  text-align: left;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+:deep(.group-toggle:hover) {
+  background: #3e923e;
 }
 </style>
