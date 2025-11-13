@@ -20,6 +20,10 @@
       </div>
     </div>
 
+    <button @click="exportUserCheckins" class="export-btn">
+      Export User Check-ins
+    </button>
+
     <!-- Filters -->
     <div class="filters">
       <div class="filter-buttons">
@@ -296,6 +300,26 @@ const handleToggleEvent = (e: CustomEvent) => {
     openGroups.value = openGroups.value.filter((k) => k !== key);
   else openGroups.value.push(key);
 };
+
+const exportUserCheckins = async () => {
+  try {
+    const res = await fetch("/api/admin/export-user-checkins", {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    if (!res.ok) throw new Error("Failed to export");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "user-checkins.xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert("Failed to export user check-ins");
+    console.error(err);
+  }
+};
 </script>
 
 <style scoped>
@@ -323,13 +347,19 @@ const handleToggleEvent = (e: CustomEvent) => {
 .total-box h3 {
   margin: 0 0 5px 0;
   font-size: 14px;
-  color: #2b7b2a;
+  color: #000000;
 }
 .total-box p {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #1b5e1b;
+  color: #000000;
+}
+
+.export-btn {
+  background-color: #d76c0f;
+  color: #000000;
+  margin-bottom: 1rem;
 }
 
 /* Filters */
@@ -341,14 +371,14 @@ const handleToggleEvent = (e: CustomEvent) => {
 .filter-buttons button {
   padding: 8px 14px;
   border: none;
-  background: #52b44f;
-  color: white;
+  background: #ecb336;
+  color: rgb(0, 0, 0);
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
 }
 .filter-buttons button.active {
-  background: #2b7b2a;
+  background: #d76c0f;
 }
 .filters input {
   flex: 1;
@@ -366,7 +396,7 @@ const handleToggleEvent = (e: CustomEvent) => {
   width: 100%;
   text-align: left;
   padding: 12px 18px;
-  background: #4caf50;
+  background: #ecb336;
   border: none;
   color: white;
   font-weight: 500;
@@ -376,7 +406,7 @@ const handleToggleEvent = (e: CustomEvent) => {
   transition: background 0.2s;
 }
 :deep(.group-toggle:hover) {
-  background: #3e923e;
+  background: #d76c0f;
 }
 
 :deep(.checkin-table) {
@@ -387,13 +417,15 @@ const handleToggleEvent = (e: CustomEvent) => {
 
 .checkin-table th,
 :deep(.checkin-table td) {
-  border: 1px solid #ddd;
+  border: 1px solid #ffffff;
+
+  color: #ccc;
   padding: 6px 10px;
   text-align: left;
 }
 
 :deep(.checkin-table th) {
-  background-color: #f2f2f2;
+  background-color: #ecb336;
 }
 
 :deep(.group-toggle),
@@ -401,8 +433,8 @@ const handleToggleEvent = (e: CustomEvent) => {
 :deep(.group-toggle.level-3),
 :deep(.group-toggle.level-4) {
   width: 100%;
-  background: #4caf50;
-  color: white;
+  background: #ecb336;
+  color: black;
   border-radius: 6px;
   padding: 12px 18px;
   margin-top: 5px;
@@ -413,6 +445,10 @@ const handleToggleEvent = (e: CustomEvent) => {
   transition: background 0.2s;
 }
 :deep(.group-toggle:hover) {
-  background: #3e923e;
+  background: #d76c0f;
+}
+
+:deep(.td) {
+  color: white;
 }
 </style>

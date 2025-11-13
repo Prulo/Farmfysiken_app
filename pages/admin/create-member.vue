@@ -1,11 +1,11 @@
 <template>
   <div class="container">
-    <h1>Create Member</h1>
+    <h1 class="heading-text">Create Member</h1>
 
     <div class="form">
-      <input v-model="newCode" placeholder="Member Code (FF10+)" />
-      <input v-model="newPin" type="password" placeholder="4-digit PIN" />
-      <input v-model="newName" placeholder="Full Name (optional)" />
+      <input v-model="newCode" placeholder="Member Code" />
+      <input v-model="newPin" type="password" placeholder="PIN" />
+      <input v-model="newName" placeholder="Name" />
       <button @click="createMember">
         {{ creating ? "Creating..." : "Create" }}
       </button>
@@ -25,10 +25,19 @@ const creating = ref(false);
 const createMessage = ref("");
 const createMessageType = ref("success");
 
-const token = localStorage.getItem("token") || "";
-
 const createMember = async () => {
   creating.value = true;
+
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
+
+  if (!token) {
+    createMessage.value = "You are not authenticated";
+    createMessageType.value = "error";
+    creating.value = false;
+    return;
+  }
+
   try {
     const res = await fetch("/api/admin/create-member", {
       method: "POST",
@@ -39,21 +48,24 @@ const createMember = async () => {
       body: JSON.stringify({
         code: newCode.value,
         pin: newPin.value,
-        name: newName.value,
+        name: newName.value || undefined,
       }),
     });
+
     const data = await res.json();
-    if (res.ok) {
+
+    if (res.ok && data.success) {
       createMessage.value = "Member created successfully!";
       createMessageType.value = "success";
       newCode.value = "";
       newPin.value = "";
       newName.value = "";
     } else {
-      createMessage.value = data.message;
+      createMessage.value = data.message || "Error creating member";
       createMessageType.value = "error";
     }
-  } catch {
+  } catch (err) {
+    console.error(err);
     createMessage.value = "Server error";
     createMessageType.value = "error";
   } finally {
@@ -63,6 +75,9 @@ const createMember = async () => {
 </script>
 
 <style scoped>
+.heading-text {
+  color: white;
+}
 .container {
   max-width: 600px;
   margin: 40px auto;
@@ -78,8 +93,8 @@ input {
   border-radius: 4px;
 }
 button {
-  background: #007a33;
-  color: white;
+  background: #ecb336;
+  color: rgb(0, 0, 0);
   border: none;
   padding: 10px;
   border-radius: 4px;

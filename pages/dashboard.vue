@@ -36,19 +36,18 @@ const loading = ref(false);
 const router = useRouter();
 
 onMounted(() => {
-  token.value = localStorage.getItem("token") || "";
-  if (!token.value) {
-    message.value = "Not logged in, redirecting...";
-    messageType.value = "error";
-    setTimeout(() => router.push("/"), 1500);
+  const token = localStorage.getItem("token") || "";
+  if (!token) {
+    router.push("/");
     return;
   }
 
   try {
-    const decoded = jwtDecode<TokenPayload>(token.value);
+    const decoded = jwtDecode<TokenPayload>(token);
 
     if (decoded.code === "FF01" || decoded.role === "admin") {
-      router.push("/admin");
+      // Admins go directly to check-ins
+      router.push("/admin/checkins");
     }
   } catch (err) {
     console.error("Invalid token", err);
@@ -106,27 +105,48 @@ const checkIn = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f3f3f3;
+
+  /* Bakgrundsbild */
+  background-image: url("../public/Tireflip\ svart\ väldigt\ stor@2x.png"); /* Lägg bilden i public/ */
+  background-size: contain; /* täcker hela skärmen */
+  background-position: center; /* centrerad */
+  background-repeat: no-repeat;
+
+  position: relative;
+}
+
+/* Overlay för kontrast */
+.dashboard-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 0;
 }
 
 .dashboard-box {
-  background: white;
+  position: relative;
+  z-index: 1;
+  background: rgba(41, 43, 46, 0.85); /* semi-transparent */
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   max-width: 400px;
   width: 100%;
   text-align: center;
 }
 
 h1 {
-  color: #136d38;
+  color: #ffffff;
   font-size: 2rem;
   margin-bottom: 20px;
 }
 
 .description {
-  color: #333;
+  color: #ffffff;
   margin-bottom: 24px;
   font-size: 1rem;
 }
@@ -134,8 +154,8 @@ h1 {
 .button {
   width: 100%;
   padding: 12px;
-  background-color: #136d38;
-  color: white;
+  background-color: #ecb336;
+  color: black;
   font-size: 1rem;
   font-weight: bold;
   border: none;
@@ -145,7 +165,7 @@ h1 {
 }
 
 .button:hover:not(:disabled) {
-  background-color: #0f552b;
+  background-color: #d76c0f;
 }
 
 .button:disabled {

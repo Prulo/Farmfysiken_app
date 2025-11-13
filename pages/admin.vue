@@ -2,13 +2,14 @@
   <div class="admin-container">
     <header class="admin-header">
       <h1 class="title">Farmfysiken Admin Panel</h1>
-      <nav class="nav-links">
+
+      <button class="hamburger-btn" @click="menuOpen = !menuOpen">☰</button>
+
+      <nav :class="['nav-links', menuOpen ? 'open' : '']">
         <RouterLink to="/admin/create-member">Create Member</RouterLink>
         <RouterLink to="/admin/checkins">Check-ins</RouterLink>
         <RouterLink to="/admin/users">User list</RouterLink>
-        <button @click="logout" class="text-red-600 font-semibold">
-          Logout
-        </button>
+        <button @click="logout" class="logout-btn">Logout</button>
       </nav>
     </header>
 
@@ -20,7 +21,7 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { jwtDecode } from "jwt-decode";
 
 interface TokenPayload {
@@ -30,6 +31,7 @@ interface TokenPayload {
 }
 
 const router = useRouter();
+const menuOpen = ref(false);
 
 onMounted(() => {
   const token = localStorage.getItem("token");
@@ -57,26 +59,82 @@ const logout = () => {
 
 <style scoped>
 .admin-header {
-  background: #2f855a;
+  background: #000000;
   color: white;
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+/* Hamburger-knapp */
+.hamburger-btn {
+  display: none; /* dold som default på stora skärmar */
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+}
+
+.logout-btn {
+  background: #ecb336;
+}
+
+/* Navigationslänkar */
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .nav-links a {
-  margin: 0 10px;
   color: white;
   text-decoration: none;
   font-weight: 500;
 }
 
-.nav-links a.router-link-active {
-  text-decoration: underline;
-}
-
 .admin-main {
   padding: 2rem;
+}
+
+/* Responsiv: under 768px (t.ex. iPad i stående) */
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: block;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #2f855a;
+    width: 200px;
+    display: none;
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a,
+  .nav-links button {
+    margin: 0.5rem 0;
+  }
+}
+
+.admin-container {
+  background-color: #292b2e;
+  min-height: 100vh;
 }
 </style>

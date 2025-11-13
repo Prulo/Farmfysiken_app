@@ -1,6 +1,6 @@
 <template>
   <div class="user-list-container">
-    <h1>Användarlista</h1>
+    <h1 class="heading-text">Användarlista</h1>
 
     <input
       v-model="search"
@@ -17,6 +17,7 @@
           <th>Kod</th>
           <th>Namn</th>
           <th>Kommentar</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -29,6 +30,17 @@
           <td>{{ user.code }}</td>
           <td>{{ user.name || "-" }}</td>
           <td>{{ user.comment || "-" }}</td>
+          <td>
+            <span class="status-wrapper">
+              <span
+                class="status-dot"
+                :class="
+                  user.active ? 'status-dot-active' : 'status-dot-inactive'
+                "
+              ></span>
+              {{ user.active ? "Aktiv" : "Inaktiv" }}
+            </span>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -64,6 +76,15 @@
         <div class="modal-buttons">
           <button @click="updateUser">Spara</button>
           <button @click="deleteUser(modalUser)">Radera</button>
+          <button @click="toggleUserStatus(true)" :disabled="modalUser.active">
+            Aktivera
+          </button>
+          <button
+            @click="toggleUserStatus(false)"
+            :disabled="!modalUser.active"
+          >
+            Inaktivera
+          </button>
           <button @click="closeModal">Avbryt</button>
         </div>
 
@@ -83,6 +104,7 @@ interface User {
   code: string;
   name?: string;
   comment?: string;
+  active?: boolean;
 }
 
 interface TokenPayload {
@@ -145,7 +167,7 @@ const filteredUsers = computed(() => {
 
 // Modal handlers
 const openUserModal = (user: User) => {
-  modalUser.value = { ...user }; // clone so we don't edit original immediately
+  modalUser.value = { ...user };
   newPassword.value = "";
   modalMessage.value = "";
   showModal.value = true;
@@ -203,9 +225,42 @@ const deleteUser = async (user: User) => {
     alert("Fel vid anslutning till server");
   }
 };
+
+const toggleUserStatus = async (status: boolean) => {
+  try {
+    const res = await fetch(
+      `/api/admin/toggle-user-status/${modalUser.value._id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
+        body: JSON.stringify({ active: status }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (res.ok) {
+      modalUser.value.active = status;
+      const idx = users.value.findIndex((u) => u._id === modalUser.value._id);
+      if (idx !== -1) users.value[idx].active = status;
+      modalMessage.value = `Användaren är nu ${status ? "aktiv" : "inaktiv"}`;
+    } else {
+      modalMessage.value = data.message || "Kunde inte ändra status";
+    }
+  } catch {
+    modalMessage.value = "Fel vid anslutning till server";
+  }
+};
 </script>
 
 <style scoped>
+.heading-text {
+  color: white;
+}
+
 .user-list-container {
   max-width: 800px;
   margin: 0 auto;
@@ -225,13 +280,15 @@ const deleteUser = async (user: User) => {
 .user-table th,
 .user-table td {
   border: 1px solid #ddd;
+  color: #ccc;
   padding: 8px;
 }
 .user-table th {
-  background-color: #f4f4f4;
+  background-color: #ecb336;
+  color: black;
 }
 .user-table tr:hover {
-  background-color: #f9f9f9;
+  background-color: #555454;
   cursor: pointer;
 }
 

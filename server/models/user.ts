@@ -7,6 +7,7 @@ export interface IUser extends Document {
   name: { type: String; default: "" };
   comment: { type: String; default: "" };
   createdAt: Date;
+  active: boolean;
 }
 
 const userSchema = new Schema<IUser>({
@@ -16,6 +17,7 @@ const userSchema = new Schema<IUser>({
   name: { type: String, default: "" },
   comment: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
+  active: { type: Boolean, default: true },
 });
 
 export default mongoose.model<IUser>("User", userSchema);

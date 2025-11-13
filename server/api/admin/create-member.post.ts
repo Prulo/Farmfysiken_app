@@ -7,7 +7,6 @@ import { verifyToken } from "../../utils/jwt";
 export default defineEventHandler(async (event) => {
   await connectDB();
 
-  // 🔒 Auth check
   const authHeader = getHeader(event, "authorization");
   if (!authHeader)
     throw createError({ statusCode: 401, message: "Unauthorized" });
@@ -31,16 +30,15 @@ export default defineEventHandler(async (event) => {
   if (!code || !pin)
     throw createError({ statusCode: 400, message: "Code and PIN required" });
 
-  // 🧠 Hash pin
   const hashedPin = await bcrypt.hash(pin, 10);
 
-  // 🧱 Create user with new fields
   const user = await User.create({
     code,
     pin: hashedPin,
-    name: name || "", // 👈 optional name
-    comment: "", // 👈 empty comment by default
+    name: name || "", //
+    comment: "", //
     role: "member",
+    active: true,
   });
 
   return {
