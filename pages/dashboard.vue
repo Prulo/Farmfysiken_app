@@ -26,27 +26,31 @@ import { jwtDecode } from "jwt-decode";
 interface TokenPayload {
   id: string;
   code: string;
+  name: string;
   role?: string;
 }
 
 const message = ref("");
 const messageType = ref<"success" | "error">("success");
-const token = ref("");
+const user_token = ref("");
+const decoded = ref<TokenPayload | null>(null);
 const loading = ref(false);
 const router = useRouter();
 
 onMounted(() => {
-  const token = localStorage.getItem("token") || "";
-  if (!token) {
+  user_token.value = localStorage.getItem("token") || "";
+  console.log("user_token", user_token);
+  console.log("user_token2", user_token);
+  console.log("user_token3", user_token.value);
+  if (!user_token.value) {
     router.push("/");
     return;
   }
 
   try {
-    const decoded = jwtDecode<TokenPayload>(token);
+    decoded.value = jwtDecode<TokenPayload>(user_token.value);
 
-    if (decoded.code === "FF01" || decoded.role === "admin") {
-      // Admins go directly to check-ins
+    if (decoded.value.code === "FF01" || decoded.value.role === "admin") {
       router.push("/admin/checkins");
     }
   } catch (err) {
@@ -57,10 +61,10 @@ onMounted(() => {
 });
 
 const checkIn = async () => {
-  if (!token.value) {
+  console.log("kossa2", decoded);
+  if (!user_token) {
     message.value = "Not logged in";
     messageType.value = "error";
-    return;
   }
 
   message.value = "";
@@ -71,7 +75,7 @@ const checkIn = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token.value}`,
+        Authorization: `Bearer ${user_token.value}`,
       },
     });
 

@@ -41,13 +41,15 @@ const login = async () => {
       body: JSON.stringify({ code: loginCode.value, pin: loginPin.value }),
     });
 
-    const data = await res.json();
+    const user_data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("token", data.token);
+      console.log("inne i ress", user_data);
+      localStorage.setItem("token", user_data.token);
+      // lagra ingen viktig info
       router.push("/dashboard");
     } else {
-      message.value = data.message || "Login failed";
+      message.value = user_data.message || "Login failed";
     }
   } catch (err) {
     message.value = "Error connecting to server";
