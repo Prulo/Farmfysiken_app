@@ -7,7 +7,6 @@ import { verifyToken } from "../../../utils/jwt";
 export default defineEventHandler(async (event) => {
   await connectDB();
 
-  // --- Auth check ---
   const authHeader = getHeader(event, "authorization");
   if (!authHeader)
     throw createError({ statusCode: 401, message: "Unauthorized" });

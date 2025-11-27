@@ -11,24 +11,28 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: "Unauthorized" });
 
   const token = authHeader.split(" ")[1];
-  const decoded = verifyToken(token) as { role: string };
-  if (!decoded || decoded.role !== "admin")
-    throw createError({
-      statusCode: 403,
-      message: "Only admin can change status",
-    });
+  const decoded = verifyToken(token) as { code: string; role: string };
 
-  const { active } = await readBody<{ active: boolean }>(event);
+  if (!decoded || (decoded.role !== "admin" && decoded.code !== "FF01"))
+    throw createError({ statusCode: 403, message: "Admin-only" });
+
   const userId = event.context.params?.id;
-
   if (!userId)
     throw createError({ statusCode: 400, message: "User ID missing" });
 
-  const user = await User.findById(userId);
-  if (!user) throw createError({ statusCode: 404, message: "User not found" });
+  const { active } = await readBody<{ active: boolean }>(event);
 
-  user.active = active;
-  await user.save();
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { active },
+    { new: true }
+  );
 
-  return { success: true, active: user.active };
+  if (!updatedUser)
+    throw createError({ statusCode: 404, message: "User not found" });
+
+  return {
+    success: true,
+    active: updatedUser.active,
+  };
 });

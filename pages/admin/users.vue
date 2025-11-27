@@ -119,7 +119,6 @@ const search = ref("");
 const router = useRouter();
 const token = ref("");
 
-// Modal state
 const showModal = ref(false);
 const modalUser = ref<User>({ _id: "", code: "" });
 const newPassword = ref("");
@@ -177,7 +176,6 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-// Update user
 const updateUser = async () => {
   try {
     const res = await fetch(`/api/admin/update-user/${modalUser.value._id}`, {

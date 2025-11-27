@@ -76,7 +76,7 @@ const logout = () => {
 
 /* Hamburger-knapp */
 .hamburger-btn {
-  display: none; /* dold som default på stora skärmar */
+  display: none;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -86,9 +86,13 @@ const logout = () => {
 
 .logout-btn {
   background: #ecb336;
+  color: #000000;
 }
 
-/* Navigationslänkar */
+:deep(.logout-btn:hover) {
+  background: #d76c0f;
+}
+
 .nav-links {
   display: flex;
   gap: 1rem;

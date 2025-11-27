@@ -4,39 +4,32 @@ import User from "../../models/user";
 import { verifyToken } from "../../utils/jwt";
 
 export default defineEventHandler(async (event) => {
+  await connectDB();
+
+  const authHeader = getHeader(event, "authorization");
+  if (!authHeader)
+    throw createError({ statusCode: 401, message: "Unauthorized" });
+
+  const token = authHeader.split(" ")[1];
+  const decoded = verifyToken(token) as { code: string; role?: string };
+
+  // Admin-check (FF01 eller admin)
+  if (!decoded || (decoded.role !== "admin" && decoded.code !== "FF01")) {
+    throw createError({ statusCode: 403, message: "Forbidden" });
+  }
+
   try {
-    console.log("👉 Connecting to DB...");
-    await connectDB();
-
-    const authHeader = getHeader(event, "authorization");
-    console.log("Auth header:", authHeader);
-
-    if (!authHeader)
-      throw createError({
-        statusCode: 401,
-        message: "Unauthorized - no header",
-      });
-
-    const token = authHeader.split(" ")[1];
-    console.log("Token:", token);
-
-    const decoded = verifyToken(token) as { code: string; role?: string };
-    console.log("Decoded token:", decoded);
-
-    if (!decoded || (decoded.role !== "admin" && decoded.code !== "FF01")) {
-      throw createError({ statusCode: 403, message: "Forbidden - not admin" });
-    }
-
-    console.log("Fetching users...");
-    const users = await User.find({}, "code name comment").sort({ code: 1 });
-    console.log("Users found:", users.length);
+    // ❗ FIX: Hämta active!
+    const users = await User.find(
+      {},
+      "code name comment active role createdAt"
+    ).sort({ code: 1 });
 
     return users;
   } catch (error) {
-    console.error("🔥 API error:", error);
     throw createError({
       statusCode: 500,
-      message: "Server error in /api/admin/list-users",
+      message: "Serverfel i /api/admin/list-users",
       data: error,
     });
   }

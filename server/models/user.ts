@@ -4,8 +4,8 @@ export interface IUser extends Document {
   code: string; // FF01 for admin, FF10+ for members
   pin: string; // 4-digit password (hashed)
   role: "admin" | "member";
-  name: { type: String; default: "" };
-  comment: { type: String; default: "" };
+  name: string;
+  comment: string;
   createdAt: Date;
   active: boolean;
 }
@@ -20,4 +20,6 @@ const userSchema = new Schema<IUser>({
   active: { type: Boolean, default: true },
 });
 
-export default mongoose.model<IUser>("User", userSchema);
+// 🔥 Den viktiga fixen
+export default mongoose.models.User ||
+  mongoose.model<IUser>("User", userSchema);
