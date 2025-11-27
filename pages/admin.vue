@@ -6,10 +6,10 @@
       <button class="hamburger-btn" @click="menuOpen = !menuOpen">☰</button>
 
       <nav :class="['nav-links', menuOpen ? 'open' : '']">
-        <RouterLink to="/admin/create-member">Create Member</RouterLink>
-        <RouterLink to="/admin/checkins">Check-ins</RouterLink>
-        <RouterLink to="/admin/users">User list</RouterLink>
-        <button @click="logout" class="logout-btn">Logout</button>
+        <RouterLink to="/admin/create-member">Skapa Användare</RouterLink>
+        <RouterLink to="/admin/checkins">Incheckiningar</RouterLink>
+        <RouterLink to="/admin/users">Användar lista</RouterLink>
+        <button @click="logout" class="logout-btn">Logga ut</button>
       </nav>
     </header>
 

@@ -1,12 +1,12 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-box">
-      <h1>Member Dashboard</h1>
+      <h1>Inloggnins skärm</h1>
 
-      <p class="description">Welcome! {{ user_name }}</p>
+      <p class="description">Välkommen {{ user_name }}</p>
 
       <button @click="checkIn" :disabled="loading" class="button">
-        {{ loading ? "Checking In..." : "Check In" }}
+        {{ loading ? "Checking In..." : "Checka In" }}
       </button>
 
       <p v-if="message" :class="['message', messageType]">
@@ -80,7 +80,7 @@ const checkIn = async () => {
     const data = await res.json();
 
     if (res.ok) {
-      message.value = "Checked in successfully!";
+      message.value = "Inloggad!";
       messageType.value = "success";
 
       setTimeout(() => {

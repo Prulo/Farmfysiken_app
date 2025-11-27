@@ -3,15 +3,15 @@
     <!-- Totals -->
     <div class="totals">
       <div class="total-box">
-        <h3>Today</h3>
+        <h3>Idag</h3>
         <p>{{ todayCount }}</p>
       </div>
       <div class="total-box">
-        <h3>This Month</h3>
+        <h3>Vecka</h3>
         <p>{{ monthCount }}</p>
       </div>
       <div class="total-box">
-        <h3>This Year</h3>
+        <h3>År</h3>
         <p>{{ yearCount }}</p>
       </div>
       <div class="total-box">
@@ -24,42 +24,36 @@
       Export User Check-ins
     </button>
 
-    <!-- Filters -->
     <div class="filters">
       <div class="filter-buttons">
         <button
-          :class="{ active: filterRange === 'day' }"
-          @click="filterRange = 'day'"
+          :class="{ active: filterRange === 'Dag' }"
+          @click="filterRange = 'Dag'"
         >
-          Day
+          Dag
         </button>
         <button
-          :class="{ active: filterRange === 'week' }"
-          @click="filterRange = 'week'"
+          :class="{ active: filterRange === 'Vecka' }"
+          @click="filterRange = 'Vecka'"
         >
-          Week
+          Vecka
         </button>
         <button
-          :class="{ active: filterRange === 'month' }"
-          @click="filterRange = 'month'"
+          :class="{ active: filterRange === 'Månad' }"
+          @click="filterRange = 'Månad'"
         >
-          Month
+          Månad
         </button>
         <button
-          :class="{ active: filterRange === 'year' }"
-          @click="filterRange = 'year'"
+          :class="{ active: filterRange === 'År' }"
+          @click="filterRange = 'År'"
         >
-          Year
+          År
         </button>
       </div>
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search member code"
-      />
+      <input v-model="searchQuery" type="text" placeholder="Sök Användare" />
     </div>
 
-    <!-- Checkins -->
     <section class="checkins">
       <div v-if="Object.keys(displayedGroups).length === 0">
         <p>No check-ins found.</p>
@@ -89,7 +83,7 @@ const router = useRouter();
 const token = ref("");
 const checkins = ref<Checkin[]>([]);
 const searchQuery = ref("");
-const filterRange = ref<"day" | "week" | "month" | "year">("day");
+const filterRange = ref<"Dag" | "Vecka" | "Månad" | "År">("Dag");
 const openGroups = ref<string[]>([]);
 
 // MOUNT
@@ -140,14 +134,12 @@ const getWeekNumber = (d: Date) => {
   return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 };
 
-// FILTERS
 const filteredCheckins = computed(() =>
   checkins.value.filter((c) =>
     c.userId?.code?.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 );
 
-// TOTALS
 const todayCount = computed(() => {
   const today = new Date().toLocaleDateString();
   return filteredCheckins.value.filter(
@@ -248,7 +240,7 @@ const displayedGroups = computed(() => {
   const list = filteredCheckins.value;
 
   switch (filterRange.value) {
-    case "day": {
+    case "Dag": {
       const g = groupByDay(list);
       return Object.fromEntries(
         Object.entries(g).sort(
@@ -257,7 +249,7 @@ const displayedGroups = computed(() => {
       );
     }
 
-    case "week": {
+    case "Vecka": {
       const g = groupByWeek(list);
       return Object.fromEntries(
         Object.entries(g).sort(([a], [b]) => {
@@ -270,7 +262,7 @@ const displayedGroups = computed(() => {
       );
     }
 
-    case "month": {
+    case "Månad": {
       const g = groupByMonth(list);
       const monthOrder = (str: string) => new Date(str).getTime(); // Works for "March 2024" etc
       return Object.fromEntries(
@@ -278,7 +270,7 @@ const displayedGroups = computed(() => {
       );
     }
 
-    case "year": {
+    case "År": {
       const g = groupByYear(list);
       return Object.fromEntries(
         Object.entries(g).sort(([a], [b]) => Number(a) - Number(b))
@@ -306,7 +298,7 @@ const renderGroup = (group: any, name: string, level = 1): string => {
     openGroups.value.includes(name) ? "block" : "none"
   };">`;
   if (Array.isArray(group)) {
-    html += `<table class="checkin-table"><thead><tr><th>Member Code</th><th>Time</th></tr></thead><tbody>`;
+    html += `<table class="checkin-table"><thead><tr><th>Användare</th><th>Tid</th></tr></thead><tbody>`;
     group.forEach((c: Checkin) => {
       html += `<tr><td>${c.userId?.code ?? "-"}</td><td>${
         c.timestamp ? new Date(c.timestamp).toLocaleTimeString() : "-"

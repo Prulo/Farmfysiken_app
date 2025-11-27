@@ -4,9 +4,12 @@ import { seedAdmin } from "./seedAdmin";
 export const connectDB = async () => {
   if (mongoose.connection.readyState === 1) return;
 
-  await mongoose.connect(
-    process.env.MONGODB_URI || "mongodb://localhost:27017/Farmfysiken"
-  );
+  const mongoUri = process.env.MONGODB_URI;
+  if (!mongoUri) {
+    throw new Error("MONGODB_URI not set in environment variables!");
+  }
+
+  await mongoose.connect(mongoUri);
 
   await seedAdmin();
 };

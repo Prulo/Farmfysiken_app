@@ -1,13 +1,13 @@
 <template>
   <div class="container">
-    <h1 class="heading-text">Create Member</h1>
+    <h1 class="heading-text">Skapa Användare</h1>
 
     <div class="form">
-      <input v-model="newCode" placeholder="Member Code" />
+      <input v-model="newCode" placeholder="Användar kod" />
       <input v-model="newPin" type="password" placeholder="PIN" />
-      <input v-model="newName" placeholder="Name" />
+      <input v-model="newName" placeholder="Namn" />
       <button @click="createMember">
-        {{ creating ? "Creating..." : "Create" }}
+        {{ creating ? "Skapar..." : "Skapa" }}
       </button>
     </div>
 
@@ -87,22 +87,27 @@ const createMember = async () => {
   flex-direction: column;
   gap: 10px;
 }
-input {
-  padding: 8px;
+
+.form input,
+.form button {
+  width: 100%;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
 }
+
 button {
   background: #ecb336;
   color: rgb(0, 0, 0);
   border: none;
-  padding: 10px;
-  border-radius: 4px;
   cursor: pointer;
 }
+
 button:hover {
   background: #005a26;
 }
+
 .success {
   color: green;
 }

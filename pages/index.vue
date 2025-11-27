@@ -4,8 +4,6 @@
       <h1>Farmfysiken Login</h1>
 
       <div class="login-form">
-        <h2>Member Login</h2>
-
         <input v-model="loginCode" placeholder="Användarnamn" class="input" />
         <input
           v-model="loginPin"
@@ -13,7 +11,7 @@
           placeholder="PIN"
           class="input"
         />
-        <button @click="login" class="button">Login</button>
+        <button @click="login" class="button">Logga in</button>
       </div>
 
       <p v-if="message" class="message">
@@ -44,11 +42,8 @@ const login = async () => {
     const user_data = await res.json();
 
     if (res.ok) {
-      console.log("inne i ress", user_data);
       localStorage.setItem("token", user_data.token);
       localStorage.setItem("name", user_data.user.name);
-
-      // lagra ingen viktig info
       router.push("/dashboard");
     } else {
       message.value = user_data.message || "Login failed";
@@ -60,19 +55,21 @@ const login = async () => {
 </script>
 
 <style scoped>
+/* Container */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url("../public/Tireflip\ svart\ väldigt\ stor@2x.png");
+
+  background-image: url("../public/Tireflip svart väldigt stor@2x.png");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-
   position: relative;
 }
 
+/* Overlay för kontrast */
 .login-container::before {
   content: "";
   position: absolute;
@@ -84,10 +81,10 @@ const login = async () => {
   z-index: 0;
 }
 
+/* Box */
 .login-box {
   position: relative;
   z-index: 1;
-
   background: rgba(41, 43, 46, 0.85);
   padding: 40px;
   border-radius: 12px;
@@ -95,8 +92,14 @@ const login = async () => {
   max-width: 400px;
   width: 100%;
   text-align: center;
+  box-sizing: border-box;
 }
 
+.login-box * {
+  box-sizing: border-box;
+}
+
+/* Headers */
 h1 {
   color: #ffffff;
   font-size: 2rem;
@@ -104,20 +107,20 @@ h1 {
 }
 
 h2 {
-  font-size: 1.25rem;
   color: #ffffff;
+  font-size: 1.25rem;
   margin-bottom: 20px;
 }
 
+/* Inputs */
 .input {
   display: block;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-bottom: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.2s;
 }
 
 .input:focus {
@@ -125,6 +128,7 @@ h2 {
   border-color: #136d38;
 }
 
+/* Button */
 .button {
   width: 100%;
   padding: 12px;
@@ -138,13 +142,19 @@ h2 {
   transition: background-color 0.3s;
 }
 
-.button:hover {
+.button:hover:not(:disabled) {
   background-color: #d76c0f;
 }
 
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Message */
 .message {
   margin-top: 20px;
-  color: red;
   font-weight: 500;
+  color: red;
 }
 </style>

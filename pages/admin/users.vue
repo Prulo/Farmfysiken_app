@@ -29,7 +29,11 @@
         >
           <td>{{ user.code }}</td>
           <td>{{ user.name || "-" }}</td>
-          <td>{{ user.comment || "-" }}</td>
+          <td>
+            <div class="comment-scroll">
+              {{ user.comment || "-" }}
+            </div>
+          </td>
           <td>
             <span class="status-wrapper">
               <span
@@ -203,7 +207,6 @@ const updateUser = async () => {
   }
 };
 
-// Delete user
 const deleteUser = async (user: User) => {
   if (!confirm(`Är du säker på att du vill radera ${user.code}?`)) return;
 
@@ -255,39 +258,82 @@ const toggleUserStatus = async (status: boolean) => {
 </script>
 
 <style scoped>
-.heading-text {
-  color: white;
-}
-
+/* Container och rubrik */
 .user-list-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  box-sizing: border-box;
 }
+
+.heading-text {
+  color: white;
+  margin-bottom: 16px;
+}
+
+/* Sökfält */
 .search-input {
   width: 100%;
   padding: 8px;
   margin-bottom: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
 }
+
+/* Tabell */
 .user-table {
   width: 100%;
   border-collapse: collapse;
+  box-sizing: border-box;
 }
+
 .user-table th,
 .user-table td {
   border: 1px solid #ddd;
   color: #ccc;
   padding: 8px;
+  box-sizing: border-box;
 }
+
 .user-table th {
   background-color: #ecb336;
   color: black;
 }
+
 .user-table tr:hover {
   background-color: #555454;
   cursor: pointer;
+}
+
+/* Kommentarfält i tabellen med scroll */
+.comment-scroll {
+  max-width: 600px;
+  max-height: 60px;
+  overflow-y: auto;
+  word-break: break-word;
+  white-space: pre-wrap;
+  padding: 4px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Statusindikatorer */
+.status-dot-active,
+.status-dot-inactive {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.status-dot-active {
+  background: green;
+}
+
+.status-dot-inactive {
+  background: red;
 }
 
 .modal-overlay {
@@ -301,31 +347,72 @@ const toggleUserStatus = async (status: boolean) => {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 400px;
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
 }
+
+/* Formfält i modal */
 .modal-content label {
   display: block;
   margin-bottom: 10px;
 }
-.modal-content input,
-.modal-content textarea {
+
+.modal-content input {
   width: 100%;
   padding: 6px;
   margin-top: 4px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing: border-box;
 }
+
+.modal-content textarea {
+  width: 100%;
+  height: 120px;
+  padding: 6px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: none;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
 }
+
 .modal-buttons button {
   padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.comment-scroll::-webkit-scrollbar,
+.modal-content textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comment-scroll::-webkit-scrollbar-thumb,
+.modal-content textarea::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.comment-scroll::-webkit-scrollbar-track,
+.modal-content textarea::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 </style>
