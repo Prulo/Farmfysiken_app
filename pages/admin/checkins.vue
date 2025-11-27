@@ -246,21 +246,50 @@ const groupByYear = (
 
 const displayedGroups = computed(() => {
   const list = filteredCheckins.value;
+
   switch (filterRange.value) {
-    case "day":
-      return groupByDay(list);
-    case "week":
-      return groupByWeek(list);
-    case "month":
-      return groupByMonth(list);
-    case "year":
-      return groupByYear(list);
+    case "day": {
+      const g = groupByDay(list);
+      return Object.fromEntries(
+        Object.entries(g).sort(
+          ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
+        )
+      );
+    }
+
+    case "week": {
+      const g = groupByWeek(list);
+      return Object.fromEntries(
+        Object.entries(g).sort(([a], [b]) => {
+          // Extract week + year
+          const [_, weekA, yearA] = a.match(/Week (\d+) - (\d+)/) || [];
+          const [__, weekB, yearB] = b.match(/Week (\d+) - (\d+)/) || [];
+          if (yearA !== yearB) return Number(yearA) - Number(yearB);
+          return Number(weekA) - Number(weekB);
+        })
+      );
+    }
+
+    case "month": {
+      const g = groupByMonth(list);
+      const monthOrder = (str: string) => new Date(str).getTime(); // Works for "March 2024" etc
+      return Object.fromEntries(
+        Object.entries(g).sort(([a], [b]) => monthOrder(a) - monthOrder(b))
+      );
+    }
+
+    case "year": {
+      const g = groupByYear(list);
+      return Object.fromEntries(
+        Object.entries(g).sort(([a], [b]) => Number(a) - Number(b))
+      );
+    }
+
     default:
       return {};
   }
 });
 
-// RENDER
 const countCheckins = (group: any): number => {
   if (Array.isArray(group)) return group.length;
   if (typeof group === "object")
@@ -362,7 +391,6 @@ const exportUserCheckins = async () => {
   margin-bottom: 1rem;
 }
 
-/* Filters */
 .filters {
   display: flex;
   gap: 10px;
@@ -376,6 +404,7 @@ const exportUserCheckins = async () => {
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  margin: 2px;
 }
 .filter-buttons button.active {
   background: #d76c0f;

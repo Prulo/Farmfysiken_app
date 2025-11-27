@@ -46,6 +46,8 @@ const login = async () => {
     if (res.ok) {
       console.log("inne i ress", user_data);
       localStorage.setItem("token", user_data.token);
+      localStorage.setItem("name", user_data.user.name);
+
       // lagra ingen viktig info
       router.push("/dashboard");
     } else {

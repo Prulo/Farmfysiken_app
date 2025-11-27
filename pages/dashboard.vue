@@ -3,9 +3,7 @@
     <div class="dashboard-box">
       <h1>Member Dashboard</h1>
 
-      <p class="description">
-        Welcome! Use the button below to check in at the gym.
-      </p>
+      <p class="description">Welcome! {{ user_name }}</p>
 
       <button @click="checkIn" :disabled="loading" class="button">
         {{ loading ? "Checking In..." : "Check In" }}
@@ -33,15 +31,15 @@ interface TokenPayload {
 const message = ref("");
 const messageType = ref<"success" | "error">("success");
 const user_token = ref("");
+const user_name = ref("");
 const decoded = ref<TokenPayload | null>(null);
 const loading = ref(false);
 const router = useRouter();
 
 onMounted(() => {
   user_token.value = localStorage.getItem("token") || "";
-  console.log("user_token", user_token);
-  console.log("user_token2", user_token);
-  console.log("user_token3", user_token.value);
+  user_name.value = localStorage.getItem("name") || "";
+
   if (!user_token.value) {
     router.push("/");
     return;
