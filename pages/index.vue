@@ -58,9 +58,16 @@ const login = async () => {
     const user_data = await res.json();
 
     if (res.ok) {
+      // Spara token och namn
       localStorage.setItem("token", user_data.token);
       localStorage.setItem("name", user_data.user.name);
-      router.push("/dashboard");
+
+      // Kolla om admin
+      if (user_data.user.code === "FF01" || user_data.user.role === "admin") {
+        router.push("/admin/checkins");
+      } else {
+        router.push("/dashboard");
+      }
     } else {
       message.value = user_data.message || "Login misslyckades";
     }
