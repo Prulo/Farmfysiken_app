@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const decoded = verifyToken(token) as { id?: string; role?: string } | null;
 
   if (!decoded || !decoded.id)
-    throw createError({ statusCode: 401, message: "Kossa" });
+    throw createError({ statusCode: 401, message: "Error" });
 
   const checkin = await Checkin.create({ userId: decoded.id });
   return { success: true, checkin };

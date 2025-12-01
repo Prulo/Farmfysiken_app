@@ -1,12 +1,12 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-box">
-      <h1>Inloggnins skärm</h1>
+      <h1>Inloggningsskärm</h1>
 
       <p class="description">Välkommen {{ user_name }}</p>
 
-      <button @click="checkIn" :disabled="loading" class="button">
-        {{ loading ? "Checking In..." : "Checka In" }}
+      <button @click="checkIn" :disabled="loading || checkedIn" class="button">
+        {{ loading ? "Checkar in..." : checkedIn ? "Inloggad" : "Checka In" }}
       </button>
 
       <p v-if="message" :class="['message', messageType]">
@@ -34,6 +34,7 @@ const user_token = ref("");
 const user_name = ref("");
 const decoded = ref<TokenPayload | null>(null);
 const loading = ref(false);
+const checkedIn = ref(false);
 const router = useRouter();
 
 onMounted(() => {
@@ -59,14 +60,10 @@ onMounted(() => {
 });
 
 const checkIn = async () => {
-  console.log("kossa2", decoded);
-  if (!user_token) {
-    message.value = "Not logged in";
-    messageType.value = "error";
-  }
+  if (checkedIn.value || loading.value) return;
 
-  message.value = "";
   loading.value = true;
+  message.value = "";
 
   try {
     const res = await fetch("/api/checkin/add", {
@@ -80,20 +77,22 @@ const checkIn = async () => {
     const data = await res.json();
 
     if (res.ok) {
+      checkedIn.value = true;
       message.value = "Inloggad!";
       messageType.value = "success";
 
+      localStorage.removeItem("token");
+
       setTimeout(() => {
-        localStorage.removeItem("token");
         router.push("/");
-      }, 3000);
+      }, 1000);
     } else {
-      message.value = data.message || "Check-in failed";
+      message.value = data.message || "Check-in misslyckades";
       messageType.value = "error";
     }
   } catch (err) {
     console.error(err);
-    message.value = "Error connecting to server";
+    message.value = "Serverfel, försök igen";
     messageType.value = "error";
   } finally {
     loading.value = false;
@@ -107,17 +106,13 @@ const checkIn = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-
-  /* Bakgrundsbild */
-  background-image: url("../public/Tireflip\ svart\ väldigt\ stor@2x.png"); /* Lägg bilden i public/ */
-  background-size: contain; /* täcker hela skärmen */
-  background-position: center; /* centrerad */
+  background-image: url("../public/Tireflip svart väldigt stor@2x.png");
+  background-size: contain;
+  background-position: center;
   background-repeat: no-repeat;
-
   position: relative;
 }
 
-/* Overlay för kontrast */
 .dashboard-container::before {
   content: "";
   position: absolute;
@@ -132,7 +127,7 @@ const checkIn = async () => {
 .dashboard-box {
   position: relative;
   z-index: 1;
-  background: rgba(41, 43, 46, 0.85); /* semi-transparent */
+  background: rgba(41, 43, 46, 0.85);
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);

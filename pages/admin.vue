@@ -8,7 +8,7 @@
       <nav :class="['nav-links', menuOpen ? 'open' : '']">
         <RouterLink to="/admin/create-member">Skapa Användare</RouterLink>
         <RouterLink to="/admin/checkins">Incheckiningar</RouterLink>
-        <RouterLink to="/admin/users">Användar lista</RouterLink>
+        <RouterLink to="/admin/users">Användarlista</RouterLink>
         <button @click="logout" class="logout-btn">Logga ut</button>
       </nav>
     </header>
@@ -109,7 +109,6 @@ const logout = () => {
   padding: 2rem;
 }
 
-/* Responsiv: under 768px (t.ex. iPad i stående) */
 @media (max-width: 768px) {
   .hamburger-btn {
     display: block;
@@ -120,7 +119,7 @@ const logout = () => {
     position: absolute;
     top: 100%;
     right: 0;
-    background: #2f855a;
+    background: #000000;
     width: 200px;
     display: none;
     padding: 1rem;

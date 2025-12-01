@@ -105,11 +105,11 @@ button {
 }
 
 button:hover {
-  background: #005a26;
+  background: #d76c0f;
 }
 
 .success {
-  color: green;
+  color: #d76c0f;
 }
 .error {
   color: red;

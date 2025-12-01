@@ -21,7 +21,7 @@
     </div>
 
     <button @click="exportUserCheckins" class="export-btn">
-      Export User Check-ins
+      Exportera incheckningsdata
     </button>
 
     <div class="filters">
@@ -51,7 +51,11 @@
           År
         </button>
       </div>
-      <input v-model="searchQuery" type="text" placeholder="Sök Användare" />
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Sök Användare (t.ex. FF10)"
+      />
     </div>
 
     <section class="checkins">
@@ -165,6 +169,9 @@ const yearCount = computed(() => {
   }).length;
 });
 
+const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
+
 const allTimeCount = computed(() => filteredCheckins.value.length);
 
 // GROUPING
@@ -189,7 +196,7 @@ const groupByWeek = (
     if (!d) return;
     const year = d.getFullYear();
     const week = getWeekNumber(d);
-    const weekKey = `Week ${week} - ${year}`;
+    const weekKey = `Vecka ${week} - ${year}`;
     const dayKey = d.toLocaleDateString();
     if (!grouped[weekKey]) grouped[weekKey] = {};
     if (!grouped[weekKey][dayKey]) grouped[weekKey][dayKey] = [];
@@ -205,10 +212,9 @@ const groupByMonth = (
   list.forEach((c) => {
     const d = parseTimestamp(c.timestamp);
     if (!d) return;
-    const monthKey = d.toLocaleString("default", {
-      month: "long",
-      year: "numeric",
-    });
+    const monthKey = capitalize(
+      d.toLocaleString("default", { month: "long", year: "numeric" })
+    );
     const dayKey = d.toLocaleDateString();
     if (!grouped[monthKey]) grouped[monthKey] = {};
     if (!grouped[monthKey][dayKey]) grouped[monthKey][dayKey] = [];
@@ -225,7 +231,7 @@ const groupByYear = (
     const d = parseTimestamp(c.timestamp);
     if (!d) return;
     const yearKey = String(d.getFullYear());
-    const monthKey = d.toLocaleString("default", { month: "long" });
+    const monthKey = capitalize(d.toLocaleString("default", { month: "long" }));
     const dayKey = d.toLocaleDateString();
     if (!grouped[yearKey]) grouped[yearKey] = {};
     if (!grouped[yearKey][monthKey]) grouped[yearKey][monthKey] = {};
@@ -253,7 +259,6 @@ const displayedGroups = computed(() => {
       const g = groupByWeek(list);
       return Object.fromEntries(
         Object.entries(g).sort(([a], [b]) => {
-          // Extract week + year
           const [_, weekA, yearA] = a.match(/Week (\d+) - (\d+)/) || [];
           const [__, weekB, yearB] = b.match(/Week (\d+) - (\d+)/) || [];
           if (yearA !== yearB) return Number(yearA) - Number(yearB);
@@ -264,7 +269,7 @@ const displayedGroups = computed(() => {
 
     case "Månad": {
       const g = groupByMonth(list);
-      const monthOrder = (str: string) => new Date(str).getTime(); // Works for "March 2024" etc
+      const monthOrder = (str: string) => new Date(str).getTime();
       return Object.fromEntries(
         Object.entries(g).sort(([a], [b]) => monthOrder(a) - monthOrder(b))
       );

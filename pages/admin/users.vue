@@ -89,7 +89,7 @@
           >
             Inaktivera
           </button>
-          <button @click="closeModal">Avbryt</button>
+          <button @click="closeModal">Stäng</button>
         </div>
 
         <p v-if="modalMessage">{{ modalMessage }}</p>
@@ -168,7 +168,6 @@ const filteredUsers = computed(() => {
   );
 });
 
-// Modal handlers
 const openUserModal = (user: User) => {
   modalUser.value = { ...user };
   newPassword.value = "";
@@ -414,5 +413,16 @@ const toggleUserStatus = async (status: boolean) => {
 .comment-scroll::-webkit-scrollbar-track,
 .modal-content textarea::-webkit-scrollbar-track {
   background: #f1f1f1;
+}
+
+@media (max-width: 480px) {
+  .modal-buttons {
+    flex-direction: column;
+    align-items: stretch; /* Sträck knapparna till full bredd */
+  }
+
+  .modal-buttons button {
+    width: 100%;
+  }
 }
 </style>
