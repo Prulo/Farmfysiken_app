@@ -79,7 +79,7 @@
 
         <div class="modal-buttons">
           <button @click="updateUser">Spara</button>
-          <button @click="deleteUser(modalUser)">Radera</button>
+          <button @click="deleteUser(modalUser)">Ta Bort</button>
           <button @click="toggleUserStatus(true)" :disabled="modalUser.active">
             Aktivera
           </button>
@@ -257,7 +257,6 @@ const toggleUserStatus = async (status: boolean) => {
 </script>
 
 <style scoped>
-/* Container och rubrik */
 .user-list-container {
   max-width: 800px;
   margin: 0 auto;
@@ -305,7 +304,6 @@ const toggleUserStatus = async (status: boolean) => {
   cursor: pointer;
 }
 
-/* Kommentarfält i tabellen med scroll */
 .comment-scroll {
   max-width: 600px;
   max-height: 60px;
@@ -418,7 +416,7 @@ const toggleUserStatus = async (status: boolean) => {
 @media (max-width: 480px) {
   .modal-buttons {
     flex-direction: column;
-    align-items: stretch; /* Sträck knapparna till full bredd */
+    align-items: stretch;
   }
 
   .modal-buttons button {
