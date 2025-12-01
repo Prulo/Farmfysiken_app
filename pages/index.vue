@@ -9,7 +9,7 @@
           <span class="prefix">FF</span>
           <input
             v-model="loginNumber"
-            placeholder="10"
+            placeholder="00"
             class="input username-input"
           />
         </div>
@@ -43,7 +43,6 @@ const router = useRouter();
 const login = async () => {
   message.value = "";
 
-  // Sätt ihop fullständig kod med FF-prefix
   const fullCode = "FF" + loginNumber.value.trim().toUpperCase();
 
   try {
@@ -73,7 +72,6 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* Container */
 .login-container {
   display: flex;
   justify-content: center;
@@ -87,7 +85,6 @@ const login = async () => {
   position: relative;
 }
 
-/* Overlay för kontrast */
 .login-container::before {
   content: "";
   position: absolute;
@@ -99,7 +96,6 @@ const login = async () => {
   z-index: 0;
 }
 
-/* Box */
 .login-box {
   position: relative;
   z-index: 1;
@@ -117,14 +113,12 @@ const login = async () => {
   box-sizing: border-box;
 }
 
-/* Headers */
 h1 {
   color: #ffffff;
   font-size: 2rem;
   margin-bottom: 20px;
 }
 
-/* Inputs */
 .input {
   display: block;
   width: 100%;
@@ -140,7 +134,6 @@ h1 {
   border-color: #136d38;
 }
 
-/* FF-prefix styling */
 .username-wrapper {
   position: relative;
   width: 100%;
@@ -155,12 +148,12 @@ h1 {
   background: transparent;
   color: black;
   font-weight: bold;
-  pointer-events: none; /* så att det inte blockerar klick i input */
+  pointer-events: none;
 }
 
 .username-input {
   width: 100%;
-  padding: 12px 12px 12px 40px; /* extra vänster-padding för FF */
+  padding: 12px 12px 12px 40px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
