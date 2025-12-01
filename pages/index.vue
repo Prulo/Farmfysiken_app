@@ -4,13 +4,23 @@
       <h1>Farmfysiken Login</h1>
 
       <div class="login-form">
-        <input v-model="loginCode" placeholder="Användarnamn" class="input" />
+        <!-- FF-prefix input -->
+        <div class="username-wrapper">
+          <span class="prefix">FF</span>
+          <input
+            v-model="loginNumber"
+            placeholder="10"
+            class="input username-input"
+          />
+        </div>
+
         <input
           v-model="loginPin"
           type="password"
           placeholder="PIN"
           class="input"
         />
+
         <button @click="login" class="button">Logga in</button>
       </div>
 
@@ -25,18 +35,25 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-const loginCode = ref("");
+const loginNumber = ref("");
 const loginPin = ref("");
 const message = ref("");
 const router = useRouter();
 
 const login = async () => {
   message.value = "";
+
+  // Sätt ihop fullständig kod med FF-prefix
+  const fullCode = "FF" + loginNumber.value.trim().toUpperCase();
+
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: loginCode.value, pin: loginPin.value }),
+      body: JSON.stringify({
+        code: fullCode,
+        pin: loginPin.value,
+      }),
     });
 
     const user_data = await res.json();
@@ -46,10 +63,11 @@ const login = async () => {
       localStorage.setItem("name", user_data.user.name);
       router.push("/dashboard");
     } else {
-      message.value = user_data.message || "Login failed";
+      message.value = user_data.message || "Login misslyckades";
     }
   } catch (err) {
-    message.value = "Error connecting to server";
+    console.error(err);
+    message.value = "Fel vid anslutning till server";
   }
 };
 </script>
@@ -106,12 +124,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-h2 {
-  color: #ffffff;
-  font-size: 1.25rem;
-  margin-bottom: 20px;
-}
-
 /* Inputs */
 .input {
   display: block;
@@ -124,6 +136,37 @@ h2 {
 }
 
 .input:focus {
+  outline: none;
+  border-color: #136d38;
+}
+
+/* FF-prefix styling */
+.username-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  color: black;
+  font-weight: bold;
+  pointer-events: none; /* så att det inte blockerar klick i input */
+}
+
+.username-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px; /* extra vänster-padding för FF */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.username-input:focus {
   outline: none;
   border-color: #136d38;
 }
