@@ -15,7 +15,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
-  // fetch all check-ins with user info
-  const checkins = await Checkin.find().populate("userId", "code");
+  const checkins = await Checkin.find().populate("userId", "code name");
   return checkins;
 });

@@ -54,13 +54,13 @@
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="Sök Användare (t.ex. FF10)"
+        placeholder="Sök Användare (t.ex. FF10 eller namn)"
       />
     </div>
 
     <section class="checkins">
       <div v-if="Object.keys(displayedGroups).length === 0">
-        <p>No check-ins found.</p>
+        <p>Inga incheckningar hittades.</p>
       </div>
 
       <div v-else>
@@ -80,9 +80,11 @@ import { jwtDecode } from "jwt-decode";
 interface Checkin {
   _id: string;
   timestamp?: string;
-  userId?: { code?: string } | null;
+  userId?: {
+    code?: string;
+    name?: string;
+  } | null;
 }
-
 const router = useRouter();
 const token = ref("");
 const checkins = ref<Checkin[]>([]);
@@ -90,7 +92,8 @@ const searchQuery = ref("");
 const filterRange = ref<"Dag" | "Vecka" | "Månad" | "År">("Dag");
 const openGroups = ref<string[]>([]);
 
-// MOUNT
+console.log(checkins);
+
 onMounted(async () => {
   token.value = localStorage.getItem("token") || "";
   if (!token.value) router.push("/");
@@ -124,6 +127,7 @@ const fetchCheckins = async () => {
   }
 };
 
+// Helpers
 const parseTimestamp = (input: any): Date | null => {
   if (!input) return null;
   const d = new Date(input);
@@ -138,12 +142,20 @@ const getWeekNumber = (d: Date) => {
   return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 };
 
-const filteredCheckins = computed(() =>
-  checkins.value.filter((c) =>
-    c.userId?.code?.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-);
+const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1);
 
+// Filtered check-ins (search both code and name)
+const filteredCheckins = computed(() => {
+  const query = searchQuery.value.toLowerCase();
+  return checkins.value.filter((c) => {
+    const code = c.userId?.code?.toLowerCase() || "";
+    const name = c.userId?.name?.toLowerCase() || "";
+    return code.includes(query) || name.includes(query);
+  });
+});
+
+// Totals
 const todayCount = computed(() => {
   const today = new Date().toLocaleDateString();
   return filteredCheckins.value.filter(
@@ -169,12 +181,9 @@ const yearCount = computed(() => {
   }).length;
 });
 
-const capitalize = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.slice(1);
-
 const allTimeCount = computed(() => filteredCheckins.value.length);
 
-// GROUPING
+// Grouping functions (Day, Week, Month, Year)
 const groupByDay = (list: Checkin[]): Record<string, Checkin[]> => {
   const grouped: Record<string, Checkin[]> = {};
   list.forEach((c) => {
@@ -242,51 +251,25 @@ const groupByYear = (
   return grouped;
 };
 
+// Compute displayed groups
 const displayedGroups = computed(() => {
   const list = filteredCheckins.value;
 
   switch (filterRange.value) {
-    case "Dag": {
-      const g = groupByDay(list);
-      return Object.fromEntries(
-        Object.entries(g).sort(
-          ([a], [b]) => new Date(a).getTime() - new Date(b).getTime()
-        )
-      );
-    }
-
-    case "Vecka": {
-      const g = groupByWeek(list);
-      return Object.fromEntries(
-        Object.entries(g).sort(([a], [b]) => {
-          const [_, weekA, yearA] = a.match(/Week (\d+) - (\d+)/) || [];
-          const [__, weekB, yearB] = b.match(/Week (\d+) - (\d+)/) || [];
-          if (yearA !== yearB) return Number(yearA) - Number(yearB);
-          return Number(weekA) - Number(weekB);
-        })
-      );
-    }
-
-    case "Månad": {
-      const g = groupByMonth(list);
-      const monthOrder = (str: string) => new Date(str).getTime();
-      return Object.fromEntries(
-        Object.entries(g).sort(([a], [b]) => monthOrder(a) - monthOrder(b))
-      );
-    }
-
-    case "År": {
-      const g = groupByYear(list);
-      return Object.fromEntries(
-        Object.entries(g).sort(([a], [b]) => Number(a) - Number(b))
-      );
-    }
-
+    case "Dag":
+      return groupByDay(list);
+    case "Vecka":
+      return groupByWeek(list);
+    case "Månad":
+      return groupByMonth(list);
+    case "År":
+      return groupByYear(list);
     default:
       return {};
   }
 });
 
+// Count check-ins recursively
 const countCheckins = (group: any): number => {
   if (Array.isArray(group)) return group.length;
   if (typeof group === "object")
@@ -296,30 +279,41 @@ const countCheckins = (group: any): number => {
 
 const renderGroup = (group: any, name: string, level = 1): string => {
   let html = `<div class="group-wrapper">`;
-  html += `<button class="group-toggle level-${level}" onclick="window.dispatchEvent(new CustomEvent('toggle',{detail:'${name}'}))">${name} (${countCheckins(
-    group
-  )})</button>`;
+
+  html += `<button class="group-toggle level-${level}" onclick="window.dispatchEvent(new CustomEvent('toggle',{detail:'${name}'}))">
+    ${name} (${countCheckins(group)})
+  </button>`;
+
   html += `<div class="group-content" style="display:${
     openGroups.value.includes(name) ? "block" : "none"
   };">`;
+
   if (Array.isArray(group)) {
     html += `<table class="checkin-table"><thead><tr><th>Användare</th><th>Tid</th></tr></thead><tbody>`;
+
     group.forEach((c: Checkin) => {
-      html += `<tr><td>${c.userId?.code ?? "-"}</td><td>${
-        c.timestamp ? new Date(c.timestamp).toLocaleTimeString() : "-"
-      }</td></tr>`;
+      const userName = c.userId?.name ?? "-"; // fallback till "-"
+      const userCode = c.userId?.code ?? "-";
+      html += `<tr>
+        <td>${userName} (${userCode})</td>
+        <td>${
+          c.timestamp ? new Date(c.timestamp).toLocaleTimeString() : "-"
+        }</td>
+      </tr>`;
     });
+
     html += `</tbody></table>`;
   } else {
     Object.entries(group).forEach(([k, v]) => {
       html += renderGroup(v, String(k), level + 1);
     });
   }
+
   html += `</div></div>`;
   return html;
 };
 
-// EVENT HANDLER
+// Toggle open groups
 const handleToggleEvent = (e: CustomEvent) => {
   const key = e.detail;
   if (openGroups.value.includes(key))
@@ -327,13 +321,13 @@ const handleToggleEvent = (e: CustomEvent) => {
   else openGroups.value.push(key);
 };
 
+// Export
 const exportUserCheckins = async () => {
   try {
     const res = await fetch("/api/admin/export-user-checkins", {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     if (!res.ok) throw new Error("Failed to export");
-
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");

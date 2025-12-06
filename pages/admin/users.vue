@@ -128,6 +128,8 @@ const modalUser = ref<User>({ _id: "", code: "" });
 const newPassword = ref("");
 const modalMessage = ref("");
 
+console.log(users);
+
 onMounted(async () => {
   token.value = localStorage.getItem("token") || "";
   if (!token.value) router.push("/");
