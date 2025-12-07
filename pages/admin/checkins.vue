@@ -1,6 +1,5 @@
 <template>
   <div class="admin-container">
-    <!-- Totals -->
     <div class="totals">
       <div class="total-box">
         <h3>Idag</h3>
@@ -92,8 +91,6 @@ const searchQuery = ref("");
 const filterRange = ref<"Dag" | "Vecka" | "Månad" | "År">("Dag");
 const openGroups = ref<string[]>([]);
 
-console.log(checkins);
-
 onMounted(async () => {
   token.value = localStorage.getItem("token") || "";
   if (!token.value) router.push("/");
@@ -127,7 +124,6 @@ const fetchCheckins = async () => {
   }
 };
 
-// Helpers
 const parseTimestamp = (input: any): Date | null => {
   if (!input) return null;
   const d = new Date(input);
@@ -145,7 +141,6 @@ const getWeekNumber = (d: Date) => {
 const capitalize = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1);
 
-// Filtered check-ins (search both code and name)
 const filteredCheckins = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return checkins.value.filter((c) => {

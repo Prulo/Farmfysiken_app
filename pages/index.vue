@@ -4,7 +4,6 @@
       <h1>Farmfysiken Login</h1>
 
       <div class="login-form">
-        <!-- FF-prefix input -->
         <div class="username-wrapper">
           <span class="prefix">FF</span>
           <input
@@ -58,11 +57,9 @@ const login = async () => {
     const user_data = await res.json();
 
     if (res.ok) {
-      // Spara token och namn
       localStorage.setItem("token", user_data.token);
       localStorage.setItem("name", user_data.user.name);
 
-      // Kolla om admin
       if (user_data.user.code === "FF01" || user_data.user.role === "admin") {
         router.push("/admin/checkins");
       } else {

@@ -8,12 +8,10 @@ export async function seedAdmin() {
   const adminExists = await User.findOne({ role: "admin" });
   if (adminExists) return;
 
-  const hashedPin = await bcrypt.hash("1991", 10); // default first PIN
+  const hashedPin = await bcrypt.hash("1991", 10);
   await User.create({
     code: "FF01",
     pin: hashedPin,
     role: "admin",
   });
-
-  console.log("First admin seeded successfully!");
 }
